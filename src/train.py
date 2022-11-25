@@ -6,9 +6,11 @@ from __future__ import division
 
 import argparse
 import os
+
 from others.logging import init_logger
-from train_abstractive import validate_abs, train_abs, baseline, test_abs, test_text_abs
-from train_extractive import train_ext, validate_ext, test_ext
+from train_abstractive import (baseline, test_abs, test_text_abs, train_abs,
+                               validate_abs)
+from train_extractive import test_ext, train_ext, validate_ext
 
 model_flags = ['hidden_size', 'ff_size', 'heads', 'emb_size', 'enc_layers', 'enc_hidden_size', 'enc_ff_size',
                'dec_layers', 'dec_hidden_size', 'dec_ff_size', 'encoder', 'ff_actv', 'use_interval']
@@ -24,23 +26,24 @@ def str2bool(v):
 
 
 
-
+# this is a chinese version of Presumm
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-task", default='ext', type=str, choices=['ext', 'abs'])
-    parser.add_argument("-encoder", default='bert', type=str, choices=['bert', 'baseline'])
+    parser.add_argument("-encoder", default='bert', type=str, choices=['bert', 'baseline'], help="baseline = TransformerAbs, bert = Bert")
+    parser.add_argument("-language", default='chinese', type=str, choices=['chinese', 'english'], help="choices of language model")
     parser.add_argument("-mode", default='train', type=str, choices=['train', 'validate', 'test'])
     parser.add_argument("-bert_data_path", default='../bert_data_new/cnndm')
     parser.add_argument("-model_path", default='../models/')
     parser.add_argument("-result_path", default='../results/cnndm')
-    parser.add_argument("-temp_dir", default='../temp')
+    parser.add_argument("-temp_dir", default='../temp', help="bert-model cache dir")
 
     parser.add_argument("-batch_size", default=140, type=int)
     parser.add_argument("-test_batch_size", default=200, type=int)
 
     parser.add_argument("-max_pos", default=512, type=int)
     parser.add_argument("-use_interval", type=str2bool, nargs='?',const=True,default=True)
-    parser.add_argument("-large", type=str2bool, nargs='?',const=True,default=False)
+    parser.add_argument("-large", type=str2bool, nargs='?',const=True,default=False, help="bert-large or bert-base")
     parser.add_argument("-load_from_extractive", default='', type=str)
 
     parser.add_argument("-sep_optim", type=str2bool, nargs='?',const=True,default=False)
@@ -49,14 +52,14 @@ if __name__ == '__main__':
     parser.add_argument("-use_bert_emb", type=str2bool, nargs='?',const=True,default=False)
 
     parser.add_argument("-share_emb", type=str2bool, nargs='?', const=True, default=False)
-    parser.add_argument("-finetune_bert", type=str2bool, nargs='?', const=True, default=True)
+    parser.add_argument("-finetune_bert", type=str2bool, nargs='?', const=True, default=True, help="finetune bert or not")
     parser.add_argument("-dec_dropout", default=0.2, type=float)
     parser.add_argument("-dec_layers", default=6, type=int)
     parser.add_argument("-dec_hidden_size", default=768, type=int)
     parser.add_argument("-dec_heads", default=8, type=int)
     parser.add_argument("-dec_ff_size", default=2048, type=int)
     parser.add_argument("-enc_hidden_size", default=512, type=int)
-    parser.add_argument("-enc_ff_size", default=512, type=int)
+    parser.add_argument("-enc_ff_size", default=512, type=int, help="bert config intermediate_size")
     parser.add_argument("-enc_dropout", default=0.2, type=float)
     parser.add_argument("-enc_layers", default=6, type=int)
 
@@ -101,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('-seed', default=666, type=int)
 
     parser.add_argument("-test_all", type=str2bool, nargs='?',const=True,default=False)
-    parser.add_argument("-test_from", default='')
+    parser.add_argument("-test_from", default='', help="之前的checkpoint")
     parser.add_argument("-test_start_from", default=-1, type=int)
 
     parser.add_argument("-train_from", default='')

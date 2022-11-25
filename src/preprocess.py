@@ -5,7 +5,7 @@ import argparse
 import time
 
 from others.logging import init_logger
-from prepro import data_builder
+from prepro import chinese_data_builder, data_builder
 
 
 def do_format_to_lines(args):
@@ -44,6 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-pretrained_model", default='bert', type=str)
 
+    parser.add_argument("-language", default='chinese', type=str, choices=["english", "chinese"])
     parser.add_argument("-mode", default='', type=str)
     parser.add_argument("-select_mode", default='greedy', type=str)
     parser.add_argument("-map_path", default='../../data/')
@@ -70,4 +71,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     init_logger(args.log_file)
-    eval('data_builder.'+args.mode + '(args)')
+
+    if args.language == "english":
+        eval('data_builder.'+args.mode + '(args)')
+    elif args.language == "chinese":
+        eval('chinese_data_builder.'+args.mode + '(args)')

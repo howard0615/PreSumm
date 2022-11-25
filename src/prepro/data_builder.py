@@ -7,20 +7,18 @@ import os
 import random
 import re
 import subprocess
+import xml.etree.ElementTree as ET
 from collections import Counter
 from os.path import join as pjoin
 
 import torch
 from multiprocess import Pool
-
 from others.logging import logger
 from others.tokenization import BertTokenizer
+from others.utils import clean
 from pytorch_transformers import XLNetTokenizer
 
-from others.utils import clean
 from prepro.utils import _get_word_ngrams
-
-import xml.etree.ElementTree as ET
 
 nyt_remove_words = ["photo", "graph", "chart", "map", "table", "drawing"]
 
@@ -29,7 +27,12 @@ def recover_from_corenlp(s):
     s = re.sub(r' \'{\w}', '\'\g<1>', s)
     s = re.sub(r'\'\' {\w}', '\'\'\g<1>', s)
 
-
+# def load_chinese_json(p):
+#     source = []
+#     tgt = []
+#     flag = False
+#     for data_pair in json.load(open(p)):
+        
 
 def load_json(p, lower):
     source = []
@@ -108,6 +111,9 @@ def load_xml(p):
 
 
 def tokenize(args):
+    # 
+    if args.language != "english":
+        raise Exception("Language must be [english] in tokenize mode!!")
     stories_dir = os.path.abspath(args.raw_path)
     tokenized_stories_dir = os.path.abspath(args.save_path)
 
@@ -136,6 +142,7 @@ def tokenize(args):
             "The tokenized stories directory %s contains %i files, but it should contain the same number as %s (which has %i files). Was there an error during tokenization?" % (
                 tokenized_stories_dir, num_tokenized, stories_dir, num_orig))
     print("Successfully finished tokenizing %s to %s.\n" % (stories_dir, tokenized_stories_dir))
+
 
 def cal_rouge(evaluated_ngrams, reference_ngrams):
     reference_count = len(reference_ngrams)
@@ -437,3 +444,4 @@ def _format_xsum_to_lines(params):
             tgt.append(sent.split())
         return {'src': source, 'tgt': tgt}
     return None
+
